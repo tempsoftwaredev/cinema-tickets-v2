@@ -1,11 +1,3 @@
-# Objective
-
-This is a coding exercise which will allow you to demonstrate how you code and your approach to a given problem. 
-
-You will be assessed on: 
-- Your ability to write clean, well-tested and reusable code.
-- How you have ensured the following business rules are correctly met.
-
 # Business Rules
 
 - There are 3 types of tickets i.e. Infant, Child, and Adult.
@@ -18,9 +10,9 @@ You will be assessed on:
 
 |   Ticket Type    |     Price   |
 | ---------------- | ----------- |
-|    INFANT        |    Â£0       |
-|    CHILD         |    Â£10      |
-|    ADULT         |    Â£20      |
+|    INFANT        |    £0       |
+|    CHILD         |    £10      |
+|    ADULT         |    £20      |
 
 - There is an existing `TicketPaymentService` responsible for taking payments.
 - There is an existing `SeatReservationService` responsible for reserving seats.

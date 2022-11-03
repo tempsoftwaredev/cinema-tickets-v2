@@ -7,6 +7,6 @@ export default class TicketService {
    */
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
-    // throws InvalidPurchaseException
+    throw new InvalidPurchaseException('ticket-service.invalid-account-id')
   }
 }

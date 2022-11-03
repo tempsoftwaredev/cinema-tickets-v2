@@ -10,7 +10,14 @@
     "test": "jest"
   },
   "devDependencies": {
-    "jest": "28.1.1",
-    "mocha": "10.0.0"
+    "@babel/preset-env": "^7.19.4",
+    "@types/jest": "^29.2.1",
+    "eslint": "^8.26.0",
+    "jest": "28.1.1"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
   }
 }
