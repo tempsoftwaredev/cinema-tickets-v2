@@ -1,17 +1,25 @@
 import InvalidPurchaseException from "../src/pairtest/lib/InvalidPurchaseException";
 import TicketTypeRequest from "../src/pairtest/lib/TicketTypeRequest";
 import TicketService from "../src/pairtest/TicketService";
+import TicketPaymentService from "../src/thirdparty/paymentgateway/TicketPaymentService";
+import SeatReservationService from "../src/thirdparty/seatbooking/SeatReservationService";
 import { errorSpy } from "./testUtil";
 
 describe("TicketService", () => {
-  const paymentService = jest.fn();
-  const seatService = jest.fn();
+  const paymentService = new TicketPaymentService();
+  const seatService = new SeatReservationService();
   const pricing = {
     INFANT: 0,
-    CHILD: 10,
-    ADULT: 20,
+    CHILD: 1000,
+    ADULT: 2000,
   };
-  const ticketService = new TicketService(paymentService, seatService, pricing);
+  const maxTickets = 20;
+  const ticketService = new TicketService(
+    paymentService,
+    seatService,
+    pricing,
+    20
+  );
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -30,7 +38,7 @@ describe("TicketService", () => {
     expect(result).toBe(true);
   });
 
-  it("should not allow more than 20 tickets to be purchased", () => {
+  it(`should not allow more than ${maxTickets} tickets to be purchased`, () => {
     const tickets = new TicketTypeRequest("ADULT", 21);
     const accountId = "1";
 
@@ -42,7 +50,7 @@ describe("TicketService", () => {
     expect(result.message).toEqual("ticket-service.too-many-tickets");
   });
 
-  it("should not allow more than 20 tickets to be purchased, across ticket types", () => {
+  it(`should not allow more than ${maxTickets} tickets to be purchased, across ticket types`, () => {
     const tickets = [
       new TicketTypeRequest("ADULT", 10),
       new TicketTypeRequest("CHILD", 10),
@@ -113,29 +121,34 @@ describe("TicketService", () => {
     ];
     const accountId = "1";
 
+    const spy = jest.spyOn(seatService, "reserveSeat");
+
     const result = ticketService.purchaseTickets(accountId, ...tickets);
 
-    expect(seatService).toHaveBeenCalledWith(Number(accountId), 11);
+    expect(spy).toHaveBeenCalledWith(Number(accountId), 11);
   });
 
   it("should charge the appropriate price for each ticket", () => {
-    const ticketSetup = [["ADULT", 5], ["CHILD", 6], "INFANT", 3];
+    const ticketSetup = [
+      ["ADULT", 5],
+      ["CHILD", 6],
+      ["INFANT", 3],
+    ];
     const expectedPrice = ticketSetup.reduce(
-      total,
-      (type, amount) => total + pricing[type] * amount
+      (total, [type, amount]) => total + pricing[type] * amount,
+      0
     );
-
     const tickets = ticketSetup.map(
       ([type, amount]) => new TicketTypeRequest(type, amount)
     );
     const accountId = "1";
 
+    const spy = jest.spyOn(paymentService, "makePayment");
+
     const result = ticketService.purchaseTickets(accountId, ...tickets);
 
-    expect(paymentService).toHaveBeenCalledWith(
-      Number(accountId),
-      expectedPrice
-    );
+    expect(spy).toHaveBeenCalledWith(Number(accountId), expectedPrice);
+    expect(result).toBe(true);
   });
 
   it.each([
@@ -152,8 +165,9 @@ describe("TicketService", () => {
   ])(
     "should catch invalid account IDs. %p is valid: %p ",
     (accountId, expected) => {
+      const tickets = new TicketTypeRequest("ADULT", 1);
       const result = new errorSpy(() =>
-        ticketService.purchaseTickets(accountId)
+        ticketService.purchaseTickets(accountId, tickets)
       ).run();
 
       if (!expected) {
