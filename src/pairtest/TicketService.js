@@ -34,7 +34,7 @@ export default class TicketService {
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
     // Validation
-    this.#throwIfTooManyTickets(ticketTypeRequests);
+    this.#throwIfIncorrectTickets(ticketTypeRequests);
     this.#throwIfNoAdultTickets(ticketTypeRequests);
     const numericAccountId = this.#convertIdOrThrow(accountId);
 
@@ -68,7 +68,12 @@ export default class TicketService {
     return result;
   }
 
-  #throwIfTooManyTickets(tickets) {
+  #throwIfIncorrectTickets(tickets) {
+    if (!tickets)
+      throw new InvalidPurchaseException("ticket-service.no-tickets-provided");
+    if (!tickets.every((t) => t instanceof TicketTypeRequest))
+      throw new InvalidPurchaseException("ticket-service.invalid-tickets");
+
     const totalTickets = tickets.reduce(
       (total, ticket) => total + ticket.getNoOfTickets(),
       0

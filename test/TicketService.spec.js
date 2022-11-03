@@ -77,6 +77,23 @@ describe("TicketService", () => {
     expect(result.message).toEqual("ticket-service.no-tickets-provided");
   });
 
+  it("should abort if a non-ticket is provided", () => {
+    const accountId = "1";
+
+    const tickets = [
+      new TicketTypeRequest("ADULT", 10),
+      "notATicket",
+      new TicketTypeRequest("INFANT", 1),
+    ];
+
+    const result = new errorSpy(() =>
+      ticketService.purchaseTickets(accountId, tickets)
+    ).run();
+
+    expect(result).toBeInstanceOf(InvalidPurchaseException);
+    expect(result.message).toEqual("ticket-service.invalid-tickets");
+  });
+
   it("should not allow child tickets without an adult ticket", () => {
     const tickets = new TicketTypeRequest("CHILD", 1);
     const accountId = "1";
