@@ -7,7 +7,7 @@
   },
   "type": "module",
   "scripts": {
-    "test": "jest",
+    "test": "jest --verbose",
     "repl": "node repl.js"
   },
   "devDependencies": {

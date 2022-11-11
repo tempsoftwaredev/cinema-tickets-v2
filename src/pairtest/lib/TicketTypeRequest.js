@@ -8,17 +8,18 @@ export default class TicketTypeRequest {
   #noOfTickets;
 
   constructor(type, noOfTickets) {
-    if (!this.#Type.includes(type)) {
+    const allowedTypes = this.constructor.getTicketTypes();
+
+    if (!allowedTypes.includes(type)) {
       throw new TypeError(
-        `type must be ${this.#Type
+        `type must be ${allowedTypes
           .slice(0, -1)
-          .join(", ")}, or ${this.#Type.slice(-1)}`
+          .join(", ")}, or ${allowedTypes.slice(-1)}`
       );
     }
 
-    if (!Number.isInteger(noOfTickets)) {
-      throw new TypeError("noOfTickets must be an integer");
-    }
+    if (!Number.isInteger(noOfTickets) || noOfTickets <= 0)
+      throw new TypeError("noOfTickets must be a positive integer");
 
     this.#type = type;
     this.#noOfTickets = noOfTickets;
@@ -34,5 +35,9 @@ export default class TicketTypeRequest {
     return this.#type;
   }
 
-  #Type = ["ADULT", "CHILD", "INFANT"];
+  static #Type = ["ADULT", "CHILD", "INFANT"];
+
+  static getTicketTypes() {
+    return this.#Type;
+  }
 }

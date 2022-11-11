@@ -4,21 +4,18 @@ import InvalidPurchaseException from "./lib/InvalidPurchaseException.js";
 export default class TicketService {
   #paymentService;
   #seatingService;
-  #pricing = {
-    ADULT: undefined,
-    CHILD: undefined,
-    INFANT: undefined,
-  };
+  #pricing = {};
   #maxTickets;
 
   constructor(paymentService, seatingService, pricing, maxTickets) {
-    Object.keys(this.#pricing).forEach((type) => {
+    const ticketTypes = TicketTypeRequest.getTicketTypes();
+    ticketTypes.forEach((type) => {
       if (!(type in pricing))
         throw new Error(`No pricing provided for ${type}`);
 
-      if (!Number.isInteger(pricing[type]))
+      if (!Number.isInteger(pricing[type]) || pricing[type] < 0)
         throw new Error(
-          `Pricing for ${type} must be an integer (provide it in pence/cents)`
+          `Pricing for ${type} must be a positive integer (provide it in pence/cents)`
         );
 
       this.#pricing[type] = pricing[type];
